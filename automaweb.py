@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
 from tkinter import messagebox
+import tkinter as tk
 import time
 import json
 
@@ -55,8 +56,10 @@ class AutomacaoWeb:
         #inicializa o driver e configura as opções do navegador.
         edge_options = Options()
         edge_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        edge_options.add_experimental_option('excludeSwitches', ['enable-logging'])
         edge_options.add_experimental_option('useAutomationExtension', False)
-        
+        edge_options.add_argument("--log-level=3")
+
         #se headless for verdadeiro, configura o driver para rodar em modo headless
         if headless:
             edge_options.add_argument("--headless=new") 
@@ -238,7 +241,17 @@ class AutomacaoWeb:
         #coleta todos os cookies da sessão atual e salva em um arquivo JSON.
         #útil para manter o login em execuções futuras.
   
-        input("Pressione Enter para salvar os cookies...")
+        #exibe uma mensagem de aviso para o usuário
+        #a ideia é que após clicar em ok, o código prossiga
+        root = tk.Tk()
+        root.attributes('-topmost', True) #deixa a janela sempre no topo
+        root.withdraw()
+        messagebox.showwarning(
+            'Atenção',
+            'Clique em "OK" apenas quando estiver pronto para salvar os cookies.',
+            parent=root
+        )
+        root.destroy()
 
         try:
             #obtém lista de dicionários com os cookies
@@ -284,7 +297,7 @@ class AutomacaoWeb:
 
         except FileNotFoundError:
             messagebox.showwarning("Aviso", f"Arquivo '{nome_arquivo}' não existe. Faça o login manual primeiro.")
-            self.salvar_cookies(nome_arquivo=nome_arquivo)
+
         except Exception as e:
             print(f"Erro ao carregar cookies: {e}")
 
