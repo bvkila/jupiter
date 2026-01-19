@@ -243,69 +243,50 @@ class AutomacaoWeb:
         try:
             #obtém lista de dicionários com os cookies
             cookies = self.driver.get_cookies()
-            
             with open(nome_arquivo, 'w') as arquivo:
                 json.dump(cookies, arquivo, indent=4)
-            
-            print(f"Cookies salvos com sucesso em '{nome_arquivo}'.")
         except Exception as e:
             print(f"Erro ao salvar cookies: {e}")
     
-    def carregar_cookies(self, url_dominio, nome_arquivo="cookies.json"):
+    def carregar_cookies(self, nome_arquivo="cookies.json"):
+
+        #carrega os cookies salvos em um arquivo JSON.
+        #a URL precisa já estar carregada para o carregamento funcionar.
 
         try:
-            print(f"Navegando para {url_dominio}...")
-            # 1. Abre o domínio (Necessário estar no site para injetar cookies)
-            self.driver.get(url_dominio)
-            time.sleep(3) # Tempo suficiente para o navegador inicializar o contexto
 
-            # 2. Lê o arquivo
             with open(nome_arquivo, 'r') as arquivo:
                 cookies = json.load(arquivo)
-
-            print(f"Tentando carregar {len(cookies)} cookies...")
-
-            # 3. Adiciona cada cookie à sessão com TRATAMENTO
             for cookie in cookies:
                 try:
-                    # --- CORREÇÕES CRÍTICAS ---
-                    
-                    # Remove o domínio para evitar erro de "Invalid Cookie Domain".
-                    # O Selenium vai atribuir o cookie ao domínio atual automaticamente.
+
+                    #remove o domínio para evitar erro de "Invalid Cookie Domain".
+                    #o selenium vai atribuir o cookie ao domínio atual automaticamente.
                     if 'domain' in cookie:
                         del cookie['domain']
 
-                    # Garante que a expiração seja um número inteiro (alguns salvam como float)
+                    #garante que a expiração seja um número inteiro (alguns salvam como float)
                     if 'expiry' in cookie:
                         cookie['expiry'] = int(cookie['expiry'])
                     
-                    # Remove sameSite se existir, pois causa conflitos frequentes em Chrome/Edge
+                    #remove sameSite se existir, pois causa conflitos frequentes em Chrome/Edge
                     if 'sameSite' in cookie:
                         del cookie['sameSite']
 
-                    # Adiciona o cookie limpo
+                    #adiciona o cookie limpo
                     self.driver.add_cookie(cookie)
                 
                 except Exception as e_cookie:
-                    # É normal alguns cookies falharem (ex: cookies de sessão já expirados)
-                    # Não pare o loop por causa disso.
+                    #é normal alguns cookies falharem (ex: cookies de sessão já expirados)
                     print(f"Ignorando cookie '{cookie.get('name', 'desconhecido')}': {e_cookie}")
 
-            # 4. Atualiza a página para o login surtir efeito
-            print("Atualizando página para aplicar sessão...")
-            self.driver.refresh()
-            time.sleep(3) 
-            
-            # Verificação simples (opcional)
-            if "login" not in self.driver.current_url:
-                print("Parece que o login foi restaurado com sucesso!")
-            else:
-                print("Aviso: A URL ainda indica que você pode estar na tela de login.")
+            self.recarregar_driver() 
 
         except FileNotFoundError:
-            print(f"Arquivo '{nome_arquivo}' não existe. Faça o login manual primeiro.")
+            messagebox.showwarning("Aviso", f"Arquivo '{nome_arquivo}' não existe. Faça o login manual primeiro.")
+            self.salvar_cookies(nome_arquivo=nome_arquivo)
         except Exception as e:
-            print(f"Erro fatal ao carregar cookies: {e}")
+            print(f"Erro ao carregar cookies: {e}")
 
 
 
