@@ -41,16 +41,29 @@ class AutomacaoWeb:
     Verificação de Textos: verifica se um texto específico existe na página.
     Verificação de Elementos: verifica se um elemento específico existe na página.
 
+    Observaçoes:
+
+    - Existe um controle de erro em todas as funções; caso ela não ocorra da maneira esperada,
+    um print vai mostrar o que não saiu como o esperado. No entanto, o raise é utilizado para
+    não dar erro na execução da automação.
+
+    - As funções de verificações retornam resultados booleanos.
+
+
     '''
 
-    def __init__(self):
+    def __init__(self, tempo_stun):
         
         self.driver = None
         self.wait = WebDriverWait(self.driver, 10) #define tempo de espera padrão
-
+        self.stun = time.sleep(tempo_stun) #é uma interpretação diferente do "wait"
+        #enquanto o wait espera por até x segundos, o stun obrigatoriamente espera x segundos
+ 
 ### NAVEGAÇÕES DENTRO DO DRIVER
 
     def iniciar_driver(self, headless=False):
+        
+        #
         try:
             #inicializa o driver e configura as opções do navegador.
             edge_options = Options()
@@ -58,17 +71,20 @@ class AutomacaoWeb:
             edge_options.add_experimental_option('excludeSwitches', ['enable-logging'])
             edge_options.add_experimental_option('useAutomationExtension', False)
             edge_options.add_argument("--log-level=3")
+            
             #se headless for verdadeiro, configura o driver para rodar em modo headless
             if headless:
                 edge_options.add_argument("--headless=new") 
             self.driver = webdriver.Edge(options=edge_options)
             self.driver.maximize_window()
-        
+
         except Exception as e:
             print(f"Erro ao iniciar o driver: {e}")
             raise
 
     def abrir_url(self, url):
+
+        #
         try:
             self.driver.get(url)
         except Exception as e:
@@ -87,6 +103,7 @@ class AutomacaoWeb:
             raise
     
     def alternar_aba(self, indice):
+
         #muda o foco para a aba especificada pelo índice (0 é a primeira, 1 é a segunda...).
         try:
             abas = self.driver.window_handles
@@ -119,6 +136,7 @@ class AutomacaoWeb:
             raise
 
     def fechar_driver(self):
+
         #fecha o navegador e encerra a sessão do driver.    
         try:
             self.driver.quit()
@@ -131,9 +149,10 @@ class AutomacaoWeb:
     def clicar(self, xpath):
     
         #clica em um elemento identificado pelo xpath.
+        self.stun
         try:
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath))).click()
-            time.sleep(0.3)
+            elemento = self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+            elemento.click()
         except Exception as e:
             print(f"Erro ao clicar no elemento: {e}")
             raise
@@ -141,27 +160,29 @@ class AutomacaoWeb:
     def digitar(self, xpath, texto):
         
         #digita um texto em um elemento identificado pelo xpath.
+        self.stun
         try:
-            self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath))).send_keys(texto)
-            time.sleep(0.3)
+            elemento = self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+            elemento.send_keys(texto)
         except Exception as e:
             print(f"Erro ao digitar no elemento: {e}")
             raise
     
-    def limpar_e_digitar(self, xpath, texto):
+    def limpar(self, xpath):
+
+        #limpa o conteúdo de um elemento de entrada.
+        self.stun
         try:
-            elemento = self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+            elemento = self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
             elemento.clear()
-            time.sleep(0.6)
-            elemento.send_keys(str(texto))
-            time.sleep(0.6)
         except Exception as e:
-            print(f"Erro ao limpar e digitar no elemento: {e}")
+            print(f"Erro ao limpar o elemento: {e}")
             raise
     
     def passar_mouse(self, xpath):
         
         #simula a ação de mover o cursor do mouse sobre o elemento (Hover).
+        self.stun
         try:
             elemento = self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
             actions = ActionChains(self.driver)
@@ -173,9 +194,10 @@ class AutomacaoWeb:
     def selecionar_texto(self, xpath, texto):
 
         #seleciona um texto dentro de um elemento.
+        self.stun
         try:
-            Select(self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))).select_by_visible_text(texto)
-            time.sleep(0.3)
+            elemento = self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+            Select(elemento).select_by_visible_text(texto)
         except Exception as e:
             print(f"Erro ao selecionar o texto {texto}: {e}")
             raise
@@ -183,21 +205,12 @@ class AutomacaoWeb:
     def selecionar_valor(self, xpath, valor):
 
         #seleciona um valor dentro de um elemento.
+        self.stun
         try:
-            Select(self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))).select_by_value(valor)
-            time.sleep(0.3)
+            elemento = self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+            Select(elemento).select_by_value(valor)
         except Exception as e:
             print(f"Erro ao selecionar o valor {valor}: {e}")
-            raise
-
-    def limpar(self, xpath):
-
-        #limpa o conteúdo de um elemento de entrada.
-        try:
-            self.wait.until(EC.presence_of_element_located((By.XPATH, xpath))).clear()
-            time.sleep(0.3)
-        except Exception as e:
-            print(f"Erro ao limpar o elemento: {e}")
             raise
     
     def obter_texto(self, xpath):
@@ -305,14 +318,11 @@ class AutomacaoWeb:
 
         #carrega os cookies salvos em um arquivo JSON.
         #a URL precisa já estar carregada para o carregamento funcionar.
-
         try:
-
             with open(nome_arquivo, 'r') as arquivo:
                 cookies = json.load(arquivo)
             for cookie in cookies:
                 try:
-
                     #remove o domínio para evitar erro de "Invalid Cookie Domain".
                     #o selenium vai atribuir o cookie ao domínio atual automaticamente.
                     if 'domain' in cookie:
@@ -332,7 +342,6 @@ class AutomacaoWeb:
                 except Exception as e_cookie:
                     #é normal alguns cookies falharem (ex: cookies de sessão já expirados)
                     print(f"Ignorando cookie '{cookie.get('name', 'desconhecido')}': {e_cookie}")
-
             self.recarregar_driver() 
 
         except FileNotFoundError:
