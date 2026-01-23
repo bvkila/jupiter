@@ -63,7 +63,7 @@ class AutomacaoWeb:
 
     def iniciar_driver(self, headless=False):
         
-        #
+        #inicializa o driver
         try:
             #inicializa o driver e configura as opções do navegador.
             edge_options = Options()
@@ -84,7 +84,7 @@ class AutomacaoWeb:
 
     def abrir_url(self, url):
 
-        #
+        #abre uma URL (precisa iniciar o driver primeiro).
         try:
             self.driver.get(url)
         except Exception as e:
