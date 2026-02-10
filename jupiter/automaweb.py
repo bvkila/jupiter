@@ -54,7 +54,7 @@ class AutomacaoWeb:
     def __init__(self, tempo_stun):
         
         self.driver = None
-        self.wait = WebDriverWait(self.driver, 10) #define tempo de espera padrão
+        self.wait = None
         self.stun = time.sleep(tempo_stun) #é uma interpretação diferente do "wait"
         #enquanto o wait espera por até x segundos, o stun obrigatoriamente espera x segundos
  
@@ -62,6 +62,7 @@ class AutomacaoWeb:
 
     def iniciar_driver(self, headless=False):
         
+        self.wait = WebDriverWait(self.driver, 10) #inicializa o WebDriverWait com o driver e um timeout padrão de 10 segundos
         #inicializa o driver
         try:
             #inicializa o driver e configura as opções do navegador.
