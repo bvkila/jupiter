@@ -1,3 +1,8 @@
+"""
+biblioteca destinada à automatização de tarefas na web
+bem como interações com o gerenciamento de arquivos no computador
+"""
+ 
 from selenium.common.exceptions import (NoSuchWindowException, SessionNotCreatedException, InvalidSessionIdException, WebDriverException, NoSuchElementException)
 from automaweb import AutomacaoWeb
 import pandas as pd
