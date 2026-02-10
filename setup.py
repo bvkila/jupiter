@@ -8,8 +8,8 @@ setup(
         "selenium",
         # tkinter e os já vêm com o Python, não precisa listar
     ],
-    author="João Braga",
-    description="Biblioteca para automação Web e gerenciamento de arquivos",
+    author="Joao Braga",
+    description="Biblioteca para automaçao Web e gerenciamento de arquivos",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     python_requires=">=3.6",
