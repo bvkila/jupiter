@@ -720,7 +720,7 @@ class Siafe(AutomacaoWeb):
                         # Tratamento de Erro de Saldo
                         try:
                             erro_titulo = self.obter_texto(xpaths_na.erro_titulo)
-                            if erro_titulo and "Erro" in erro_titulo:
+                            if "Erro" in erro_titulo:
                                 erro_body = self.obter_texto(xpaths_na.erro_corpo)
                                 if erro_body and "Saldo insuficiente para contabilização" in erro_body: 
                                     messagebox.showwarning("Aviso", "Saldo insuficiente. O programa tentará novamente.")
