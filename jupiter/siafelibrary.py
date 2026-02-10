@@ -1,8 +1,6 @@
+from selenium.common.exceptions import (NoSuchWindowException, SessionNotCreatedException, InvalidSessionIdException, WebDriverException, NoSuchElementException)
 from automaweb import AutomacaoWeb
 import pandas as pd
-
-from selenium.common.exceptions import (NoSuchWindowException, SessionNotCreatedException, InvalidSessionIdException, WebDriverException, NoSuchElementException)
-
 from tkinter import messagebox
 import decimal
 import time

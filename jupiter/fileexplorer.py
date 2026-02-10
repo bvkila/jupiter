@@ -3,6 +3,8 @@ biblioteca destinada à automatização de tarefas na web
 bem como interações com o gerenciamento de arquivos no computador
 """
     
+from tkinter import messagebox
+import time
 import os
 import shutil
 from tkinter import filedialog
