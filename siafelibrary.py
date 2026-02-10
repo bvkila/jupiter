@@ -21,14 +21,17 @@ class Siafe(AutomacaoWeb):
         super().__init__(tempo_stun=0.3)
 
     def erro_pesquisa(self, xpath_erro, xpath_btn_fechar):
+        
+        #se houver erro na pesquisa, fechar a janela de erro
         try:
-            if self.driver.find_elements(By.XPATH, xpath_erro):
+            if self.encontrar_elementos(xpath_erro):
                 self.clicar(xpath_btn_fechar)
                 return True
         except: pass
     
     def voltar(self):
 
+        #volta para a tela principal da contabilização
         try:
             time.sleep(0.4)
             if self.clicar(xpaths_menu.btn_voltar):
@@ -55,14 +58,14 @@ class Siafe(AutomacaoWeb):
             self.digitar(xpaths_login.senha, senha)
             self.clicar(xpaths_login.btn_confirmar)
             
+            #verificar se ocorreu algum erro
             try:
                 erro_titulo = self.obter_texto(xpaths_login.erro_titulo)
                 if erro_titulo and "Erro" in erro_titulo:
                     erro_body = self.obter_texto(xpaths_login.erro_corpo)
                     if erro_body and "Usuário e/ou senha incorretos." in erro_body:
                         messagebox.showwarning("Aviso", "Usuário ou Senha incorretos. Volte a tela de login e tente novamente.")
-                        return False
-                        
+                        return False   
             except NoSuchElementException: 
                 pass
                 
@@ -140,7 +143,7 @@ class Siafe(AutomacaoWeb):
                         # Validações Cabeçalho
                         if not (self.verificar_texto_digitado(xpaths_gr.data_emissao, row["data"]) and self.verificar_texto_digitado(xpaths_gr.data_recolhimento, row["data"])):
                             self.voltar(); continue
-                        if not self.verificar_select(xpaths_gr.tipo_documento, dict_contabil["TipoDocumento"]):
+                        if not self.verifica_selecionado(xpaths_gr.tipo_documento, dict_contabil["TipoDocumento"]):
                             self.voltar(); continue
                         if not self.verificar_texto_digitado(xpaths_gr.domicilio_bancario, dict_contabil["DomicilioBancarioCompleto"]):
                             self.voltar(); continue
@@ -270,7 +273,7 @@ class Siafe(AutomacaoWeb):
                         self.digitar(xpaths_pde.ug_emitente, dict_contabil["UG"])
                         self.clicar(xpaths_pde.ug_emitente_pesquisar)
                         
-                        if not self.is_selected(xpaths_pde.ob_regulaziracao):
+                        if not self.verifica_selecionado(xpaths_pde.ob_regulaziracao):
                             self.clicar(xpaths_pde.ob_regulaziracao)
                         self.selecionar_texto(xpaths_pde.regularizacao, dict_contabil["Regularizacao"])
                         
@@ -296,7 +299,7 @@ class Siafe(AutomacaoWeb):
                         # Validações Cabeçalho
                         if not (self.verificar_texto_digitado(xpaths_pde.data_emissao, row["data"]) and self.verificar_texto_digitado(xpaths_pde.data_programacao, row["data"]) and self.verificar_texto_digitado(xpaths_pde.data_vencimento, row["data"])):
                             self.voltar(); continue
-                        if not (self.verificar_texto_digitado(xpaths_pde.domicilio_bancario_origem, dict_contabil["DomicilioBancarioOrigemCompleto"]) and self.verificar_select(xpaths_pde.domicilio_bancario_destino, dict_contabil["DomicilioBancarioDestino"])):
+                        if not (self.verificar_texto_digitado(xpaths_pde.domicilio_bancario_origem, dict_contabil["DomicilioBancarioOrigemCompleto"]) and self.verifica_selecionado(xpaths_pde.domicilio_bancario_destino, dict_contabil["DomicilioBancarioDestino"])):
                             self.voltar(); continue
 
                         # --- PREENCHIMENTO DO ITEM (INLINE) ---
@@ -313,7 +316,7 @@ class Siafe(AutomacaoWeb):
                             self.digitar(xpaths_pde.valor, row["valor_str"])
                             
                             # Validações Item
-                            if not self.verificar_select(xpaths_pde.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]):
+                            if not self.verifica_selecionado(xpaths_pde.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]):
                                  raise Exception("Falha na verificação: Operacao Patrimonial (PDE)")
                             if not self.verificar_texto_digitado(xpaths_pde.valor, row["valor_str"]):
                                  raise Exception("Falha na verificação: Valor (PDE)")
@@ -405,7 +408,7 @@ class Siafe(AutomacaoWeb):
                         self.erro_pesquisa(xpaths_pdt.erro_pesquisar_ugp, xpaths_pdt.btn_erro_pesquisar_ugp)
                         
                         if "Regularizacao" in dict_contabil:
-                            if not self.is_selected(xpaths_pdt.ob_regulaziracao):
+                            if not self.verifica_selecionado(xpaths_pdt.ob_regulaziracao):
                                 self.clicar(xpaths_pdt.ob_regulaziracao)
                             self.selecionar_texto(xpaths_pdt.regularizacao, dict_contabil["Regularizacao"])
                         
@@ -465,7 +468,7 @@ class Siafe(AutomacaoWeb):
                             self.digitar(xpaths_pdt.valor, row["valor_str"])
 
                             # Validações Item
-                            if not self.verificar_select(xpaths_pdt.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]):
+                            if not self.verifica_selecionado(xpaths_pdt.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]):
                                  raise Exception("Falha na verificação: Operacao Patrimonial (PDT)")
                             if not self.verificar_texto_digitado(xpaths_pdt.valor, row["valor_str"]):
                                  raise Exception("Falha na verificação: Valor (PDT)")
@@ -544,7 +547,8 @@ class Siafe(AutomacaoWeb):
                         inicio = time.perf_counter()
                         
                         # --- CABEÇALHO ---
-                        self.limpar_e_digitar(xpaths_np.data_emissao, row["data"])
+                        self.limpar(xpaths_np.data_emissao)
+                        self.digitar(xpaths_np.data_emissao, row["data"])
                         ug_emitente = dict_contabil.get("UG")
                         if not ug_emitente: self.voltar(); continue
                         self.digitar(xpaths_np.ug_emitente, ug_emitente)
@@ -674,7 +678,8 @@ class Siafe(AutomacaoWeb):
                         inicio = time.perf_counter()
                         
                         # --- CABEÇALHO ---
-                        self.limpar_e_digitar(xpaths_na.data_emissao, row["data"])
+                        self.limpar(xpaths_na.data_emissao)
+                        self.digitar(xpaths_na.data_emissao, row["data"])
                         self.digitar(xpaths_na.ug_emitente, dict_contabil["UG"])
                         
                         # Lógica de Estorno (Via Dicionário)
@@ -703,7 +708,7 @@ class Siafe(AutomacaoWeb):
                         
                         # Validações
                         if not self.verificar_texto_digitado(xpaths_na.data_emissao, row["data"]): self.voltar(); continue
-                        if not self.verificar_select(xpaths_na.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]): self.voltar(); continue
+                        if not self.verifica_selecionado(xpaths_na.operacao_patrimonial, dict_contabil["OperacaoPatrimonial"]): self.voltar(); continue
                         if not self.verificar_texto_digitado(xpaths_na.valor, row["valor_str"]): self.voltar(); continue
                         
                         # --- FINALIZAÇÃO ---
