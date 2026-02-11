@@ -1,19 +1,18 @@
 """
-biblioteca destinada à automatização de tarefas na web
-bem como interações com o gerenciamento de arquivos no computador
+biblioteca destinada à automatização de tarefas no Siafe, utilizando a biblioteca automaweb.
 """
- 
-from selenium.common.exceptions import (NoSuchWindowException, SessionNotCreatedException, InvalidSessionIdException, WebDriverException, NoSuchElementException)
-from .automaweb import AutomacaoWeb
+
+import automaweb
 import pandas as pd
 from tkinter import messagebox
+from selenium.common.exceptions import (NoSuchWindowException, SessionNotCreatedException, InvalidSessionIdException, WebDriverException, NoSuchElementException)
 import decimal
 import time
 
 ctx = decimal.Context()
 ctx.prec = 20
 
-class Siafe(AutomacaoWeb):
+class Siafe(automaweb.Navegador):
     """
     Classe autônoma para encapsular toda a interação com o Siafe.
     Gerencia seu próprio driver e métodos de interação com o navegador.
