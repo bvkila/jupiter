@@ -1,1 +1,8 @@
 testes/teste01.py
+jupiter_subtes.egg-info/dependency_links.txt
+jupiter_subtes.egg-info/PKG-INFO
+jupiter_subtes.egg-info/requires.txt
+jupiter_subtes.egg-info/SOURCES.txt
+jupiter_subtes.egg-info/top_level.txt
+*.gz
+*.whl
